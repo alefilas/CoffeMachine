@@ -13,11 +13,11 @@ static Scanner scanner = new Scanner(System.in);
         while (true) {
 
             String action = scanner.next();
-            if (action.equals("exit")){
-                break;
+            try {
+                coffeeMachine.input(action);
+            } catch (Exception e) {
+                return;
             }
-            coffeeMachine.input(action);
-
         }
     }
 }
