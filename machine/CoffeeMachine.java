@@ -1,8 +1,5 @@
 package machine;
 
-
-import java.util.Scanner;
-
 public class CoffeeMachine {
 
 
@@ -14,11 +11,11 @@ public class CoffeeMachine {
     private States state = States.CHOOSING_ACTION;
 
     {
-        System.out.println("Write action (buy, fill, take, remaining, exit): ");
+        printQuestion();
     }
 
 
-    public void input(String action) {
+    public void input(String action) throws Exception {
         switch (state) {
             case CHOOSING_ACTION:
                 action(action);
@@ -26,49 +23,35 @@ public class CoffeeMachine {
             case CHOOSING_COFFEE:
                 buy(action);
                 break;
-            case FILLING_WATER:
-                water += Integer.parseInt(action);
-                System.out.println("Write how many ml of milk do you want to add: ");
-                state = States.FILLING_MILK;
-                break;
-            case FILLING_MILK:
-                milk += Integer.parseInt(action);
-                System.out.println("Write how many grams of coffee beans do you want to add: ");
-                state = States.FILLING_COFFEE_BEANS;
-                break;
-            case FILLING_COFFEE_BEANS:
-                coffeeBeans += Integer.parseInt(action);
-                System.out.println("Write how many disposable cups of coffee do you want to add:");
-                state = States.FILLING_DISPOSABLE_CUPS;
-                break;
-            case FILLING_DISPOSABLE_CUPS:
-                disposableCups += Integer.parseInt(action);
-                System.out.println("Write action (buy, fill, take, remaining, exit): ");
-                state = States.CHOOSING_ACTION;
-                break;
+            default:
+                fill(action);
         }
     }
 
-    public void action(String action) {
+    private void action(String action) throws Exception {
 
         switch (action) {
             case "buy":
-                System.out.println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino," +
-                        " back - to main menu: ");
                 state = States.CHOOSING_COFFEE;
+                printQuestion();
                 break;
             case "fill":
-                System.out.println("Write how many ml of water do you want to add: ");
                 state = States.FILLING_WATER;
+                printQuestion();
                 break;
             case "take":
                 take();
-                System.out.println("Write action (buy, fill, take, remaining, exit): ");
+                printQuestion();
                 break;
             case "remaining":
                 writeInfo();
-                System.out.println("Write action (buy, fill, take, remaining, exit): ");
+                printQuestion();
                 break;
+            case "exit":
+                throw new Exception();
+            default:
+                System.out.println("Incorrect input!");
+                printQuestion();
         }
     }
 
@@ -78,9 +61,51 @@ public class CoffeeMachine {
         money = 0;
     }
 
+    private void fill(String quantity) {
+
+        switch (state) {
+            case FILLING_WATER:
+                try {
+                    water += Integer.parseInt(quantity);
+                } catch (NumberFormatException e) {
+                    System.out.println("It's not a number!\n");
+                }
+                state = States.FILLING_MILK;
+                printQuestion();
+                break;
+            case FILLING_MILK:
+                try {
+                    milk += Integer.parseInt(quantity);
+                } catch (NumberFormatException e) {
+                    System.out.println("It's not a number!\n");
+                }
+                state = States.FILLING_COFFEE_BEANS;
+                printQuestion();
+                break;
+            case FILLING_COFFEE_BEANS:
+                try {
+                    coffeeBeans += Integer.parseInt(quantity);
+                } catch (NumberFormatException e) {
+                    System.out.println("It's not a number!\n");
+                }
+                state = States.FILLING_DISPOSABLE_CUPS;
+                printQuestion();
+                break;
+            case FILLING_DISPOSABLE_CUPS:
+                try {
+                    disposableCups += Integer.parseInt(quantity);
+                } catch (NumberFormatException e) {
+                    System.out.println("It's not a number!\n");
+                }
+                state = States.CHOOSING_ACTION;
+                printQuestion();
+                break;
+        }
+    }
+
     private void buy(String action) {
 
-        Coffee coffee;
+        Coffee coffee = null;
 
         switch (action) {
             case "1":
@@ -94,16 +119,18 @@ public class CoffeeMachine {
                 break;
             case "back":
                 state = States.CHOOSING_ACTION;
-                System.out.println("Write action (buy, fill, take, remaining, exit): ");
+                printQuestion();
                 return;
             default:
-                throw new IllegalStateException("Unexpected value: ");
+                System.out.println("Incorrect input!");
+                printQuestion();
         }
 
-        cook(coffee);
-        state = States.CHOOSING_ACTION;
-        System.out.println("Write action (buy, fill, take, remaining, exit): ");
-
+        if (coffee != null) {
+            cook(coffee);
+            state = States.CHOOSING_ACTION;
+            printQuestion();
+        }
     }
 
     private void cook(Coffee coffee) {
@@ -119,6 +146,31 @@ public class CoffeeMachine {
             money += coffee.getMoney();
         }
 
+    }
+
+    private void printQuestion() {
+
+        switch (state) {
+            case CHOOSING_ACTION:
+                System.out.println("Write action (buy, fill, take, remaining, exit): ");
+                break;
+            case CHOOSING_COFFEE:
+                System.out.println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino," +
+                        " back - to main menu: ");
+                break;
+            case FILLING_WATER:
+                System.out.println("Write how many ml of water do you want to add: ");
+                break;
+            case FILLING_MILK:
+                System.out.println("Write how many ml of milk do you want to add: ");
+                break;
+            case FILLING_COFFEE_BEANS:
+                System.out.println("Write how many grams of coffee beans do you want to add: ");
+                break;
+            case FILLING_DISPOSABLE_CUPS:
+                System.out.println("Write how many disposable cups of coffee do you want to add:");
+                break;
+        }
     }
 
 
